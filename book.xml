@@ -1,0 +1,17 @@
+<book>
+  <person>
+    <first>Alice</first>
+    <last>Jones</last>
+    <age>23</age>
+  </person>
+  <person>
+    <first>Sam</first>
+    <last>Smith</last>
+    <age>32</age>
+  </person>
+  <person>
+    <first>Joe</first>
+    <last>Ford</last>
+    <age>56</age>
+  </person>
+</book>
