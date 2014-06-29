@@ -47,7 +47,7 @@ class CheckboxCellRenderer extends DefaultListCellRenderer
     private static final long serialVersionUID = 1L;
     protected static Border noFocusBorder = new EmptyBorder(1, 1, 1, 1);
 
-    public Component getListCellRendererComponent(JList list, Object value,
+    public Component getListCellRendererComponent(JList<?> list, Object value,
         int index, boolean isSelected, boolean cellHasFocus) {
         if(value instanceof CheckBoxListEntry) {
             CheckBoxListEntry checkbox = (CheckBoxListEntry)value;

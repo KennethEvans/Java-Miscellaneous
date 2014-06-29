@@ -30,6 +30,8 @@ package misc;
  * 
  * Created on October 5, 2006, 9:53 AM
  *
+ * Modified June 29, 2014 for generic object warnings
+ * 
  */
 
 /**
@@ -44,14 +46,14 @@ import javax.swing.JCheckBox;
 import javax.swing.JList;
 import javax.swing.ListSelectionModel;
 
-public class CheckBoxList extends JList
+public class CheckBoxList extends JList<Object>
 {
     private static final long serialVersionUID = 1L;
 
     public CheckBoxList() {
         super();
 
-        setModel(new DefaultListModel());
+        setModel(new DefaultListModel<Object>());
         setCellRenderer(new CheckboxCellRenderer());
 
         addMouseListener(new MouseAdapter() {
@@ -77,7 +79,7 @@ public class CheckBoxList extends JList
 
     public int[] getCheckedIdexes() {
         java.util.List<Integer> list = new java.util.ArrayList<Integer>();
-        DefaultListModel dlm = (DefaultListModel)getModel();
+        DefaultListModel<Object> dlm = (DefaultListModel<Object>)getModel();
         for(int i = 0; i < dlm.size(); ++i) {
             Object obj = getModel().getElementAt(i);
             if(obj instanceof JCheckBox) {
@@ -99,7 +101,7 @@ public class CheckBoxList extends JList
 
     public java.util.List<JCheckBox> getCheckedItems() {
         java.util.List<JCheckBox> list = new java.util.ArrayList<JCheckBox>();
-        DefaultListModel dlm = (DefaultListModel)getModel();
+        DefaultListModel<Object> dlm = (DefaultListModel<Object>)getModel();
         for(int i = 0; i < dlm.size(); ++i) {
             Object obj = getModel().getElementAt(i);
             if(obj instanceof JCheckBox) {

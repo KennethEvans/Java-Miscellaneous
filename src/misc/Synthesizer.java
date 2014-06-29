@@ -191,7 +191,7 @@ public class Synthesizer extends JPanel
       }
     });
 
-    JComboBox instMenu = new JComboBox();
+    JComboBox<String> instMenu = new JComboBox<String>();
     this.add(instMenu);
     Instrument[] instruments = synth.getAvailableInstruments();
     for(int i = 0; i < instruments.length; i++) {
@@ -204,8 +204,16 @@ public class Synthesizer extends JPanel
 
       public void itemStateChanged(ItemEvent ev) {
         Object source = ev.getSource();
-        if(!(source instanceof JComboBox)) return;
-        JComboBox combo = (JComboBox)source;
+        if(!(source instanceof JComboBox<?>)) return;
+        // Avoid unchecked cast warning in the smallest possible scope. To check
+        // here you would have to use List<?> since you cannot perform
+        // instanceof check against parameterized type List<GpxModel>.
+        // That generic type information is erased at runtime. Using List<?>
+        // doesn't eliminate the warning. Use tempList in the try block as the
+        // @SuppressWarnings("unchecked") has to be where the value is declared
+        // _and_ set.
+        @SuppressWarnings("unchecked")
+        JComboBox<String> combo = (JComboBox<String>)source;
         int index = combo.getSelectedIndex();
         if(index < 0) return;
         channel.programChange(index);
