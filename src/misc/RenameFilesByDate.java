@@ -109,7 +109,7 @@ public class RenameFilesByDate
     }
 
     /**
-     * Get the extension of a file.
+     * Get the extension of a file (without the dot).
      * 
      * @param file
      * @return

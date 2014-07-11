@@ -87,7 +87,7 @@ public class Countm4a
     }
 
     /**
-     * Get the extension of a file.
+     * Get the extension of a file (without the dot).
      * 
      * @param file
      * @return
