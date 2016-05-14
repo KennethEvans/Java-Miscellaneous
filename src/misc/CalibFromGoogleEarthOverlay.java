@@ -30,12 +30,11 @@ public class CalibFromGoogleEarthOverlay
 {
     public static final String LS = System.getProperty("line.separator");
     private static final String DIR = "C:/Users/evans/Documents/Biking";
-    private static final String zipName = DIR + "/"
-        + "Highland Hiking-Sking Trail Map White.kmz";
-    // private static final String calibName = "Highland Hiking-Sking Trail Map
-    // White.calib";
-    private static final String calibName = DIR + "/" + "aaa"
-        + "CalibFromGoogleEarthOverlay.calib";
+//    private static final String BASE_NAME = "Highland Hiking-Sking Trail Map";
+    private static final String BASE_NAME = "Proud Lake Trails Map";
+    private static final String zipName = DIR + "/" + BASE_NAME + ".kmz";
+    private static final String calibName = DIR + "/" + BASE_NAME + ".calib";
+//    private static final String calibName = DIR + "/aaa" + BASE_NAME + ".kmz";
     private static final String TEMP_IMAGE_NAME_NO_EXTENSION = DIR + "/"
         + "aaaaTemp.";
 
