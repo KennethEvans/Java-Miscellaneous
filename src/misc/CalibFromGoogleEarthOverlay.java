@@ -28,7 +28,9 @@ import org.xml.sax.InputSource;
 
 public class CalibFromGoogleEarthOverlay
 {
-    public static final String LS = System.getProperty("line.separator");
+    public static boolean WARNING = true;
+
+    private static final String LS = System.getProperty("line.separator");
     private static final String DIR = "C:/Users/evans/Documents/Biking";
     // private static final String BASE_NAME = "Highland Hiking-Sking Trail
     // Map";
@@ -280,8 +282,6 @@ public class CalibFromGoogleEarthOverlay
             double y = .5 * (north - south);
             double xcen = .5 * (east + west);
             double ycen = .5 * (north + south);
-            double theta0 = Math.atan2(y, x);
-            // double theta = theta0 + Math.toRadians(rotation);
             double theta = Math.toRadians(rotation);
             PrintWriter out = null;
             try {
@@ -316,6 +316,12 @@ public class CalibFromGoogleEarthOverlay
     }
 
     public static void main(String[] args) {
+        if(WARNING) {
+            Utils.warnMsg("There is a problem with this calculation." + LS
+                + "It is a little off." + LS + LS
+                + "Aborting until it is fixed...");
+            return;
+        }
         String zipFileName = zipName;
         System.out.println("Reading " + zipFileName);
         Data data = unzip(zipFileName);
