@@ -32,14 +32,12 @@ public class CalibFromGoogleEarthOverlay
 
     private static final String LS = System.getProperty("line.separator");
     private static final String DIR = "C:/Users/evans/Documents/Biking";
-    // private static final String BASE_NAME = "Highland Hiking-Sking Trail
-    // Map";
+    private static final String BASE_NAME = "Highland Bike Trail Map";
     // private static final String BASE_NAME = "Proud Lake Trails Map";
-    private static final String BASE_NAME = "Proud Lake Hiking-Biking-Bridle Trails Map";
+//    private static final String BASE_NAME = "Proud Lake Hiking-Biking-Bridle Trails Map";
     private static final String zipName = DIR + "/" + BASE_NAME + ".kmz";
-    private static final String calibName = DIR + "/" + BASE_NAME + ".calib";
-    // private static final String calibName = DIR + "/aaa" + BASE_NAME +
-    // ".kmz";
+//    private static final String calibName = DIR + "/" + BASE_NAME + ".calib";
+    private static final String calibName = DIR + "/aaa" + BASE_NAME + ".calib";
     private static final String TEMP_IMAGE_NAME_NO_EXTENSION = DIR + "/"
         + "aaaaTemp.";
 
@@ -283,6 +281,11 @@ public class CalibFromGoogleEarthOverlay
             double xcen = .5 * (east + west);
             double ycen = .5 * (north + south);
             double theta = Math.toRadians(rotation);
+            // DEBUG
+            System.out.printf("N=%10.6f S=%10.6f E=%10.6f W=%10.6f " + LS,
+                north, south, east, west);
+            System.out.printf("xcen==%10.6f ycen=%10.6f x=%10.6f y=%10.6f " + LS,
+                xcen, ycen, x, y);
             PrintWriter out = null;
             try {
                 out = new PrintWriter(new FileWriter(file));
@@ -291,18 +294,22 @@ public class CalibFromGoogleEarthOverlay
                 x1 = -x * Math.cos(theta) - y * Math.sin(theta) + xcen;
                 y1 = -x * Math.sin(theta) + y * Math.cos(theta) + ycen;
                 out.printf(format, 0, 0, x1, y1, "NW");
+                System.out.printf(format, 0, 0, x1, y1, "NW");
                 // NE
                 x1 = x * Math.cos(theta) - y * Math.sin(theta) + xcen;
                 y1 = x * Math.sin(theta) + y * Math.cos(theta) + ycen;
                 out.printf(format, size.x - 1, 0, x1, y1, "NE");
+                System.out.printf(format, size.x - 1, 0, x1, y1, "NE");
                 // SE
                 x1 = x * Math.cos(theta) + y * Math.sin(theta) + xcen;
                 y1 = x * Math.sin(theta) - y * Math.cos(theta) + ycen;
                 out.printf(format, size.x - 1, size.y - 1, x1, y1, "SE");
+                System.out.printf(format, size.x - 1, size.y - 1, x1, y1, "SE");
                 // SW
                 x1 = -x * Math.cos(theta) + y * Math.sin(theta) + xcen;
                 y1 = -x * Math.sin(theta) - y * Math.cos(theta) + ycen;
                 out.printf(format, 0, size.y - 1, x1, y1, "SW");
+                System.out.printf(format, 0, size.y - 1, x1, y1, "SW");
                 System.out.println("Wrote " + calibName);
             } catch(Exception ex) {
                 ex.printStackTrace();
@@ -318,8 +325,8 @@ public class CalibFromGoogleEarthOverlay
     public static void main(String[] args) {
         if(WARNING) {
             Utils.warnMsg("There is a problem with this calculation." + LS
-                + "It is a little off." + LS + LS
-                + "Aborting until it is fixed...");
+                + "It is not accurate." + LS + LS
+                + "Aborting until it is resolved...");
             return;
         }
         String zipFileName = zipName;
