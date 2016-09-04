@@ -44,7 +44,7 @@ public class ParseSTLCSVFile
         }
     }
 
-    private static void writeOutput() {
+    public static void writeOutput() {
         for(Data data : list) {
             System.out.format("%20s %6d % 4d %10s %8.1f %8.1f" + LS,
                 formatter.format(data.getDate()), data.getYear(),
