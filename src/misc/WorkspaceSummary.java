@@ -55,6 +55,8 @@ public class WorkspaceSummary
                     summary.appendJars(file.getName());
                 } else if(file.getName().equals(".classpath")) {
                     setClasspath(summary, file);
+                } else if(file.getName().equals(".project")) {
+                    setProject(summary, file);
                 } else if(file.getName().equals("plugin.xml")) {
                     summary.setPlugin(file.getName());
                 } else if(file.getName().equals("plugin.properties")) {
@@ -117,6 +119,35 @@ public class WorkspaceSummary
         }
     }
 
+    public static void setProject(Summary summary, File file) {
+        BufferedReader in = null;
+        try {
+            in = new BufferedReader(new FileReader(file));
+            String line;
+            while((line = in.readLine()) != null) {
+                if(line.toLowerCase().contains("<nature>")) {
+                    int index1 = line.indexOf("<");
+                    int index2 = line.lastIndexOf(">");
+                    if(index1 > 0 && index2 > 0) {
+                        String text = line.toLowerCase()
+                            .substring(index1, index2 + 1)
+                            .replaceAll("<nature>", "")
+                            .replaceAll("</nature>", "");
+                        summary.appendNatures(text);
+                    }
+                }
+            }
+        } catch(Exception ex) {
+            ex.printStackTrace();
+        } finally {
+            try {
+                if(in != null) in.close();
+            } catch(IOException ex) {
+                ex.printStackTrace();
+            }
+        }
+    }
+
     public static void setCorePrefs(Summary summary, File file) {
         BufferedReader in = null;
         try {
@@ -164,8 +195,8 @@ public class WorkspaceSummary
         // Headings
         String[] headings = new String[] {"Name", "J2SE", "Target",
             "Compliance", "Source", "UI Prefs", "Core Prefs", "Manifest",
-            "Plug-in", "Product", "Properties", "Feature", "SVN", "Git",
-            "Jars",};
+            "Plug-in", "Product", "Properties", "Feature", "SVN", "Git", "Jars",
+            "Natures"};
         for(String heading : headings) {
             writer.print(heading + COMMA);
         }
@@ -190,6 +221,7 @@ public class WorkspaceSummary
             writer.print(summary.getSvn() + COMMA);
             writer.print(summary.getGit() + COMMA);
             writer.print(summary.getJars() + COMMA);
+            writer.print(summary.getNatures() + COMMA);
             writer.println();
         }
         writer.flush();
@@ -231,6 +263,7 @@ public class WorkspaceSummary
         private String git = "";
         private String j2se = "";
         private String jars = "";
+        private String natures = "";
 
         /**
          * @return The value of properties.
@@ -440,6 +473,24 @@ public class WorkspaceSummary
                 this.jars = jars;
             } else {
                 this.jars += " " + jars;
+            }
+        }
+
+        /**
+         * @return The value of natures.
+         */
+        public String getNatures() {
+            return natures;
+        }
+
+        /**
+         * @param natures The new value for natures.
+         */
+        public void appendNatures(String natures) {
+            if(this.natures.isEmpty()) {
+                this.natures = natures;
+            } else {
+                this.natures += " " + natures;
             }
         }
 
