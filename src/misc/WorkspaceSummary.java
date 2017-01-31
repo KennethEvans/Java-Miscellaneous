@@ -2,14 +2,31 @@ package misc;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+
+import com.sun.org.apache.xerces.internal.parsers.DOMParser;
 
 /*
  * Created on Jan 29, 2017
@@ -51,8 +68,9 @@ public class WorkspaceSummary
                         summary.setCorePrefs("core.prefs");
                         setCorePrefs(summary, corePrefs);
                     }
-                } else if(file.getName().toLowerCase().endsWith(".jar")) {
-                    summary.appendJars(file.getName());
+                    // } else if(file.getName().toLowerCase().endsWith(".jar"))
+                    // {
+                    // summary.appendJars(file.getName());
                 } else if(file.getName().equals(".classpath")) {
                     setClasspath(summary, file);
                 } else if(file.getName().equals(".project")) {
@@ -76,45 +94,107 @@ public class WorkspaceSummary
             projectsList.add(summary);
         }
         Collections.sort(projectsList, new Comparator<Summary>() {
+            // Make a case-independent sort
             public int compare(Summary o1, Summary o2) {
-                return o1.getName().compareTo(o2.getName());
+                return o1.getName().toLowerCase()
+                    .compareTo(o2.getName().toLowerCase());
             }
         });
         return projectsList;
     }
 
     public static void setClasspath(Summary summary, File file) {
-        BufferedReader in = null;
-        final String test = "StandardVMType/";
+        // Parse as XML
+        DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory
+            .newInstance();
+        FileInputStream fileInputStream = null;
         try {
-            in = new BufferedReader(new FileReader(file));
-            String line;
-            while((line = in.readLine()) != null) {
-                if(line.contains("org.eclipse.jdt.launching.JRE_CONTAINER")) {
-                    int index = line.indexOf(test);
-                    if(index < 0) {
-                        summary.setJ2se("Default");
-                    } else {
-                        String start = line.substring(index + test.length());
-                        int end = start.indexOf("\"/>");
-                        if(end < 0) end = start.length();
-                        start = start.substring(0, end);
-                        end = start.indexOf("\">");
-                        if(end < 0) end = start.length();
-                        start = start.substring(0, end);
-                        summary.setJ2se(start.substring(0, end));
+            DocumentBuilder documentBuilder = documentBuilderFactory
+                .newDocumentBuilder();
+            fileInputStream = new FileInputStream(file);
+            Document document = documentBuilder.parse(fileInputStream);
+            Element elementRoot = document.getDocumentElement();
+
+            NodeList nodeList = elementRoot
+                .getElementsByTagName("classpathentry");
+            for(int i = 0; i < nodeList.getLength(); i++) {
+                String kind = null, path = null, sourcepath = null;
+                Node node = nodeList.item(i);
+                NamedNodeMap attributes = node.getAttributes();
+                if(attributes == null) continue;
+                try {
+                    kind = attributes.getNamedItem("kind").getTextContent();
+                } catch(Exception ex) {
+                    kind = null;
+                }
+                if(kind == null) continue;
+                if(kind.equals("lib")) {
+                    try {
+                        path = attributes.getNamedItem("path").getTextContent();
+                    } catch(Exception ex) {
+                        path = null;
+                    }
+                    try {
+                        sourcepath = attributes.getNamedItem("sourcepath")
+                            .getTextContent();
+                    } catch(Exception ex) {
+                        sourcepath = null;
+                    }
+                    if(path != null) {
+                        summary.appendJars(path);
+                    }
+                    if(sourcepath != null) {
+                        summary.appendJars(sourcepath);
+                    }
+                } else if(kind.equals("src")) {
+                    try {
+                        path = attributes.getNamedItem("path").getTextContent();
+                    } catch(Exception ex) {
+                        path = null;
+                    }
+                    if(path != null && !path.equals("src")) {
+                        summary.appendSources(path);
+                    }
+                } else if(kind.equals("con")) {
+                    try {
+                        path = attributes.getNamedItem("path").getTextContent();
+                    } catch(Exception ex) {
+                        path = null;
+                    }
+                    if(path != null) {
+                        final String test1 = "StandardVMType/";
+                        int index = path.indexOf(test1);
+                        if(index < 0) {
+                            summary.setJ2se("Default");
+                        } else {
+                            String start = path
+                                .substring(index + test1.length());
+                            int end = start.indexOf("\"/>");
+                            if(end < 0) end = start.length();
+                            start = start.substring(0, end);
+                            end = start.indexOf("\">");
+                            if(end < 0) end = start.length();
+                            start = start.substring(0, end);
+                            summary.setJ2se(start.substring(0, end));
+                        }
                     }
                 }
             }
-        } catch(
-
-        Exception ex) {
+        } catch(ParserConfigurationException ex) {
+            ex.printStackTrace();
+        } catch(FileNotFoundException ex) {
+            ex.printStackTrace();
+        } catch(SAXException ex) {
+            ex.printStackTrace();
+        } catch(IOException ex) {
             ex.printStackTrace();
         } finally {
-            try {
-                if(in != null) in.close();
-            } catch(IOException ex) {
-                ex.printStackTrace();
+            if(fileInputStream != null) {
+                try {
+                    fileInputStream.close();
+                } catch(Exception ex) {
+                    // Do nothing
+                }
             }
         }
     }
@@ -196,12 +276,11 @@ public class WorkspaceSummary
         String[] headings = new String[] {"Name", "J2SE", "Target",
             "Compliance", "Source", "UI Prefs", "Core Prefs", "Manifest",
             "Plug-in", "Product", "Properties", "Feature", "SVN", "Git", "Jars",
-            "Natures"};
+            "Sources", "Natures"};
         for(String heading : headings) {
             writer.print(heading + COMMA);
         }
         writer.println();
-        // Projects
         if(summaryList == null) {
             writer.println("No projects");
         }
@@ -221,7 +300,9 @@ public class WorkspaceSummary
             writer.print(summary.getSvn() + COMMA);
             writer.print(summary.getGit() + COMMA);
             writer.print(summary.getJars() + COMMA);
-            writer.print(summary.getNatures() + COMMA);
+            writer.print(summary.getSources() + COMMA);
+            // No comma after the last one
+            writer.print(summary.getNatures());
             writer.println();
         }
         writer.flush();
@@ -229,16 +310,18 @@ public class WorkspaceSummary
 
     public static void main(String[] args) {
         List<Summary> projectsList = getData();
-        printSummary(new PrintWriter(System.out, true), projectsList);
         PrintWriter writer = null;
+        writer = new PrintWriter(System.out, true);
+        printSummary(writer, projectsList);
+        writer.flush();
         try {
-            writer = new PrintWriter(new FileWriter(DEFAULT_OUTPUT_FILE));
-            printSummary(new PrintWriter(new FileWriter(DEFAULT_OUTPUT_FILE)),
-                projectsList);
+            writer = new PrintWriter(new File(DEFAULT_OUTPUT_FILE));
+            printSummary(writer, projectsList);
         } catch(Exception ex) {
             ex.printStackTrace();
         } finally {
             if(writer != null) {
+                writer.flush();
                 writer.close();
             }
         }
@@ -264,6 +347,7 @@ public class WorkspaceSummary
         private String j2se = "";
         private String jars = "";
         private String natures = "";
+        private String sources = "";
 
         /**
          * @return The value of properties.
@@ -491,6 +575,24 @@ public class WorkspaceSummary
                 this.natures = natures;
             } else {
                 this.natures += " " + natures;
+            }
+        }
+
+        /**
+         * @return The value of sources.
+         */
+        public String getSources() {
+            return sources;
+        }
+
+        /**
+         * @param sources The new value for sources.
+         */
+        public void appendSources(String sources) {
+            if(this.sources.isEmpty()) {
+                this.sources = sources;
+            } else {
+                this.sources += " " + sources;
             }
         }
 
