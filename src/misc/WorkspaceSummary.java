@@ -32,6 +32,7 @@ public class WorkspaceSummary
 {
     public static final String LS = System.getProperty("line.separator");
     public static final String COMMA = ",";
+    public static final String ITEM_DELIMITER = "\012";
     private static final String DEFAULT_WORKSPACE = "C:/eclipseWorkspaces/Work";
     private static final String DEFAULT_OUTPUT_FILE = "C:/Users/evans/Documents/Personal/Calc/Eclipse Work Project Summary.csv";
 
@@ -551,7 +552,7 @@ public class WorkspaceSummary
             if(this.jars.isEmpty()) {
                 this.jars = jars;
             } else {
-                this.jars += " " + jars;
+                this.jars += ITEM_DELIMITER + jars;
             }
         }
 
@@ -569,7 +570,7 @@ public class WorkspaceSummary
             if(this.natures.isEmpty()) {
                 this.natures = natures;
             } else {
-                this.natures += " " + natures;
+                this.natures += ITEM_DELIMITER + natures;
             }
         }
 
@@ -587,7 +588,7 @@ public class WorkspaceSummary
             if(this.sources.isEmpty()) {
                 this.sources = sources;
             } else {
-                this.sources += " " + sources;
+                this.sources += ITEM_DELIMITER + sources;
             }
         }
 
