@@ -32,7 +32,7 @@ public class WorkspaceSummary
 {
     public static final String LS = System.getProperty("line.separator");
     public static final String COMMA = ",";
-    public static final String ITEM_DELIMITER = "\012";
+    public static final String ITEM_DELIMITER = "\n";
     private static final String DEFAULT_WORKSPACE = "C:/eclipseWorkspaces/Work";
     private static final String DEFAULT_OUTPUT_FILE = "C:/Users/evans/Documents/Personal/Calc/Eclipse Work Project Summary.csv";
 
@@ -295,10 +295,9 @@ public class WorkspaceSummary
             writer.print(summary.getFeature() + COMMA);
             writer.print(summary.getSvn() + COMMA);
             writer.print(summary.getGit() + COMMA);
-            writer.print(summary.getJars() + COMMA);
-            writer.print(summary.getSources() + COMMA);
-            // No comma after the last one
-            writer.print(summary.getNatures());
+            writer.print("\"" + summary.getJars() + "\"" + COMMA);
+            writer.print("\"" + summary.getSources() + "\"" + COMMA);
+            writer.print("\"" + summary.getNatures() + "\"" + COMMA);
             writer.println();
         }
         writer.flush();
