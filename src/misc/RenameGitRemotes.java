@@ -11,7 +11,7 @@ import run.Run;
  * Renames origin to github in repositories using the CSV output from
  * RepositoryManager.
  * 
- * !!!!!!!!!! Warning: The CSV needs to have \n converted to space, first,
+ * !!!!!!!!!! Warning: The CSV needs to have \n converted to space first,
  * otherwise the reader won't get the full line.
  * 
  * !!!!!!!!!! Warning: If you rerun after some repositories have been processed,
@@ -29,7 +29,7 @@ public class RenameGitRemotes
     private static final String FROM_NAME = "origin";
     private static final String TO_NAME = "github";
     private static final String REMOTE_PATTERN = "origin git@github.com:";
-    /** Column, zero-based, in the CSV that is named Remotes. */
+    /** Column, zero-based, that is named Remotes in the CSV. */
     private static final int REMOTES_COL = 13;
     private static final String DELIMITER = ",";
     private static final String LS = Utils.LS;
