@@ -23,6 +23,10 @@ import run.Run;
  * 
  * Currently using inkscape.exe and proc.destroy() after. This seems to work.
  * 
+ * Another approach would be to use --shell. This would give one Inkscape
+ * process with each conversion sent as a one line input. Could probably send
+ * quit. Couldn't use the Run package.
+ * 
  * @author Kenneth Evans, Jr.
  */
 public class MakePNGFromInkscape
