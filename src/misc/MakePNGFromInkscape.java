@@ -15,6 +15,14 @@ import run.Run;
  * Converts a SVG file in Inkscape to PNG files of differing resolutions.
  * Overwrites files in the destination.
  * 
+ * Using inkscape.exe, it gets no output, and the process has to be killed after
+ * exit with 0.
+ * 
+ * Using inkscape.com, it gets no output, the process doesn't exit, and
+ * proc.destroy() doesn't work. Because of the timeout, it takes longer.
+ * 
+ * Currently using inkscape.exe and proc.destroy() after. This seems to work.
+ * 
  * @author Kenneth Evans, Jr.
  */
 public class MakePNGFromInkscape
@@ -63,6 +71,7 @@ public class MakePNGFromInkscape
             out += errOutput;
         }
 
+        // Inkscape remains running so do this
         Process proc = run.getProc();
         if(proc != null) {
             proc.destroy();
@@ -82,6 +91,7 @@ public class MakePNGFromInkscape
             + ".png");
         argsList.add("--export-width=" + size);
         argsList.add("--export-height=" + size);
+        // These just make it quit without doing anything
         // argsList.add("--verb=FileClose");
         // argsList.add("--verb=FileQuit");
 
