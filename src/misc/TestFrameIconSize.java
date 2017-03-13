@@ -16,8 +16,7 @@ import javax.swing.border.EmptyBorder;
 public class TestFrameIconSize
 {
     private static boolean useArray = false;
-    private static final int[] SIZE_SPECIFIC = {16, 32, 48, 64, 96, 256};
-    // private static final int[] SIZE_SPECIFIC = {16, 32, 48, 256};
+    private static final int[] SIZE_SPECIFIC = {16, 32, 64, 48, 96, 256};
     private static final int SIZE_MAX = 256;
     private static final int SIZE_MIN = 16;
 

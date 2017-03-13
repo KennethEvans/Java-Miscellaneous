@@ -31,12 +31,16 @@ import run.Run;
  */
 public class MakePNGFromInkscape
 {
-    private static final String SVG_NAME = "Windows Performance.svg";
-    private static final String DEST_BASE_NAME = "WindowsPerformance";
-    private static final int[] SIZES = {16, 32, 48, 96, 256};
-    // private static final int[] SIZES = {32};
+    public static final int[] SIZES_WINDOWS = {16, 32, 48, 256};
+    public static final int[] SIZES_WINDOWS_LARGE = {16, 32, 48, 64, 96, 256};
+    public static final int[] SIZES_ANDROID = {48, 72, 96, 144, 192};
+
+    private static final String SVG_NAME = "ICC Profile Viewer.svg";
+    private static final String DEST_BASE_NAME = "ICC Profile Viewer";
+    private static final int[] SIZES = SIZES_WINDOWS;
+
     private static final String SVG_PATH = "C:/Users/evans/Documents/Inkscape";
-    private static final String DEST_PATH = "C:/Scratch/Icons";
+    private static final String DEST_PATH = "C:/Scratch/Icons/Test";
     private static final String EXE_PATH = "C:/Program Files/Inkscape/inkscape.exe";
 
     private static final String LS = Utils.LS;

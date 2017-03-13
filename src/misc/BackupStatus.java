@@ -111,7 +111,8 @@ public class BackupStatus
         }
         File directoryList[] = top.listFiles();
         for(File log : directoryList) {
-            if(!getExtension(log).equals("log")) continue;
+            String ext = getExtension(log);
+            if(ext == null || !ext.equals("log")) continue;
             processLog(log);
         }
     }
