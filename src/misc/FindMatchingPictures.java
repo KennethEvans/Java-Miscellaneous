@@ -159,7 +159,6 @@ public class FindMatchingPictures
         run();
         System.out.println();
         System.out.println("All Done");
-
     }
 
     /**
