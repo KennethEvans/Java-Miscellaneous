@@ -16,6 +16,13 @@ import java.util.zip.ZipInputStream;
  * ZIP utilities from http://www.codejava.net/java-se/file-io/programmatically-extract-a-zip-file-using-java
  */
 
+/**
+ * ExtractSTLFromZIPs extracts all the files and directories in all the ZIP
+ * files in the hard-coded ZIP_DIR to the hard-coded OUT_DIR.
+ * 
+ * Created to extract STL tracks from multiple downloads.
+ * 
+ */
 public class ExtractSTLFromZIPs
 {
     private static final String ZIP_DIR = "C:/Scratch/AAA/STL Download/ZIP";
