@@ -34,9 +34,10 @@ public class MakePNGFromInkscape
     public static final int[] SIZES_WINDOWS = {16, 32, 48, 256};
     public static final int[] SIZES_WINDOWS_LARGE = {16, 32, 48, 64, 96, 256};
     public static final int[] SIZES_ANDROID = {48, 72, 96, 144, 192};
+    public static final int[] SIZES_JAVA = {32};
 
-    private static final String SVG_NAME = "RepositoryManager.svg";
-    private static final String DEST_BASE_NAME = "RepositoryManager";
+    private static final String SVG_NAME = "SocketClient.svg";
+    private static final String DEST_BASE_NAME = "SocketClient";
     private static final int[] SIZES = SIZES_WINDOWS;
 
     private static final String SVG_PATH = "C:/Users/evans/Documents/Inkscape";

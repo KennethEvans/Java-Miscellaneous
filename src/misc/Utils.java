@@ -111,7 +111,7 @@ public class Utils
      * @param msg
      * @param ex
      */
-    public static void excMsg(String msg, Error ex) {
+    public static void excMsg(String msg, Throwable ex) {
         final String fullMsg = msg += LS + "Exception: " + ex + LS
             + ex.getMessage();
         // Show it in a message box
