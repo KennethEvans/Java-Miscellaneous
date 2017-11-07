@@ -3,6 +3,8 @@ package misc;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -55,6 +57,7 @@ public class SocketClient extends JFrame
 
     private BufferedReader in;
     private PrintWriter out;
+    private boolean socketRunning = false;
 
     private Socket socket;
     private static final int SERVERPORT = 6000;
@@ -82,33 +85,26 @@ public class SocketClient extends JFrame
             public void actionPerformed(ActionEvent e) {
                 String response;
                 if(socket == null) {
-                    showMsg("Socket is null" + "\n");
+                    showMsg("Socket is null");
                     return;
                 }
                 if(!socket.isConnected()) {
-                    showMsg("Socket is not connected" + "\n");
+                    showMsg("Socket is not connected");
                     return;
                 }
                 if(out == null) {
-                    showMsg("Socket output writer is null" + "\n");
+                    showMsg("Socket output writer is null");
                     return;
                 }
                 if(in == null) {
-                    showMsg("Socket input reader is null" + "\n");
+                    showMsg("Socket input reader is null");
                     return;
                 }
                 try {
                     out.println(dataField.getText());
-                    response = in.readLine();
-                    // if(response == null || response.equals("")) {
-                    // System.exit(0);
-                    // }
-                } catch(IOException ex) {
-                    response = "IO Error: " + ex;
                 } catch(Exception ex) {
-                    response = "Error: " + ex;
+                    showMsg("IO error writing to socket", ex);
                 }
-                showMsg(response + "\n");
                 dataField.selectAll();
             }
         });
@@ -141,8 +137,7 @@ public class SocketClient extends JFrame
         menuItem.setText("Start");
         menuItem.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ae) {
-                // Start the socket
-                new Thread(new ClientThread()).start();
+                start();
             }
         });
         menu.add(menuItem);
@@ -151,14 +146,7 @@ public class SocketClient extends JFrame
         menuItem.setText("Stop");
         menuItem.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ae) {
-                if(socket != null && !socket.isClosed()) {
-                    try {
-                        socket.close();
-                    } catch(Exception ex) {
-                        showMsg("Error closing socket", ex);
-                        return;
-                    }
-                }
+                stop();
             }
         });
         menu.add(menuItem);
@@ -201,9 +189,14 @@ public class SocketClient extends JFrame
             // UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
             // SwingUtilities.updateComponentTreeUI(this);
             this.setTitle(TITLE);
-            this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-            // frame.setLocationRelativeTo(null);
-
+            // this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+            this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+            this.addWindowListener(new WindowAdapter() {
+                @Override
+                public void windowClosing(WindowEvent event) {
+                    quit();
+                }
+            });
             // // Set the icon
             // ImageUtils.setIconImageFromResource(this,
             // "/resources/ICC Profile Viewer.256x256.png");
@@ -226,13 +219,39 @@ public class SocketClient extends JFrame
         Date currentTime = new Date();
         String timeString = mFormatter.format(currentTime);
         if(textArea != null) {
-            textArea.append(timeString + " " + text);
+            textArea.insert(timeString + " " + text + "\n", 0);
         }
     }
 
     private void showMsg(String text, Throwable t) {
-        String msg = text + " " + t.getMessage() + "\n";
+        String msg = text + " " + t.getMessage();
         showMsg(msg);
+    }
+
+    /**
+     * Starts the socket.
+     */
+    private void start() {
+        stop();
+        new Thread(new ClientThread()).start();
+        showMsg("Started");
+    }
+
+    /**
+     * Closes the socket.
+     */
+    private void stop() {
+        socketRunning = false;
+        if(socket != null) {
+            try {
+                socket.close();
+                showMsg("Socket closed");
+                socket = null;
+            } catch(Exception ex) {
+                showMsg("Error closing socket", ex);
+            }
+            showMsg("Socket stopped");
+        }
     }
 
     /**
@@ -280,8 +299,9 @@ public class SocketClient extends JFrame
                 in = new BufferedReader(
                     new InputStreamReader(socket.getInputStream()));
                 out = new PrintWriter(socket.getOutputStream(), true);
+                socketRunning = true;
                 showMsg("Socket: " + socket.getInetAddress().getHostAddress()
-                    + ":" + socket.getPort() + "\n");
+                    + ":" + socket.getPort());
             } catch(UnknownHostException ex) {
                 String msg = "Unknown host error starting socket";
                 Utils.excMsg(msg, ex);
@@ -291,22 +311,37 @@ public class SocketClient extends JFrame
                 Utils.excMsg(msg, ex);
                 showMsg("Error closing socket", ex);
             }
-            while (!Thread.currentThread().isInterrupted()) {
-            
-            }
-            // Clean up
-            if(in != null) {
+            String inputLine;
+            while(socketRunning) {
                 try {
-                    in.close();
-                } catch(Exception ex) {
-                    // Do nothing
+                    while((inputLine = in.readLine()) != null) {
+                        showMsg("Server: " + inputLine);
+                    }
+                } catch(IOException ex) {
+                    showMsg("Error reading socket", ex);
+                    break;
                 }
-            }
-            if(out != null) {
-                try {
-                    out.close();
-                } catch(Exception ex) {
-                    // Do nothing
+                // Clean up
+                if(in != null) {
+                    try {
+                        in.close();
+                    } catch(Exception ex) {
+                        // Do nothing
+                    }
+                }
+                if(out != null) {
+                    try {
+                        out.close();
+                    } catch(Exception ex) {
+                        // Do nothing
+                    }
+                }
+                if(socket != null) {
+                    try {
+                        socket.close();
+                    } catch(Exception ex) {
+                        // Do nothing
+                    }
                 }
             }
         }
