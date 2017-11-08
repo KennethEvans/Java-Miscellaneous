@@ -1,6 +1,8 @@
 package misc;
 
-import java.awt.BorderLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
@@ -15,12 +17,15 @@ import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.prefs.Preferences;
 
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTextArea;
@@ -52,7 +57,9 @@ public class SocketClient extends JFrame
     private static final String INITIAL_DATA = "Msg from " + NAME;
 
     private JMenuBar menuBar;
-    private JTextField dataField = new JTextField(40);
+    private JTextField portText = new JTextField(40);
+    private JTextField ipText = new JTextField(40);
+    private JTextField dataText = new JTextField(40);
     private JTextArea textArea;
 
     private BufferedReader in;
@@ -60,10 +67,24 @@ public class SocketClient extends JFrame
     private boolean socketRunning = false;
 
     private Socket socket;
-    private static final int SERVERPORT = 6000;
+    private static final int SERVER_PORT = 6000;
+    private int serverPort = SERVER_PORT;
+    private int serverPortNext = SERVER_PORT;
     private static final String SERVER_IP = "192.168.0.100";
+    private String serverIp = SERVER_IP;
+    private String serverIpNext = SERVER_IP;
+
+    private static final String P_PREFERENCE_NODE = "net/kenevans/socketClient/preferences";
+    private static final String P_DEFAULT_PORT = "ServerPort";
+    private static final int D_DEFAULT_PORT = SERVER_PORT;
+    private static final String P_DEFAULT_IP = "ServerIP";
+    private static final String D_DEFAULT_IP = SERVER_IP;
 
     public SocketClient() {
+        Preferences prefs = getUserPreferences();
+        serverPort = serverPortNext = prefs.getInt(P_DEFAULT_PORT,
+            D_DEFAULT_PORT);
+        serverIp = serverIpNext = prefs.get(P_DEFAULT_IP, D_DEFAULT_IP);
         uiInit();
     }
 
@@ -71,19 +92,134 @@ public class SocketClient extends JFrame
      * Initializes the user interface.
      */
     void uiInit() {
-        this.setLayout(new BorderLayout());
+        JLabel label;
+        GridBagConstraints gbcDefault = new GridBagConstraints();
+        gbcDefault.insets = new Insets(2, 2, 2, 2);
+        gbcDefault.anchor = GridBagConstraints.WEST;
+        gbcDefault.fill = GridBagConstraints.NONE;
+        GridBagConstraints gbc = null;
 
-        // Create the ata field
-        dataField = new JTextField(40);
-        dataField.setText(INITIAL_DATA);
-        dataField.addActionListener(new ActionListener() {
+        this.setLayout(new GridBagLayout());
+
+        // Create the entry boxes
+        JPanel entries = new JPanel(new GridBagLayout());
+        entries.setLayout(new GridBagLayout());
+        gbc = (GridBagConstraints)gbcDefault.clone();
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 100;
+        this.add(entries, gbc);
+
+        // Create the IP panel
+        JPanel ipPanel = new JPanel();
+        ipPanel.setLayout(new GridBagLayout());
+        gbc = (GridBagConstraints)gbcDefault.clone();
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 100;
+        entries.add(ipPanel, gbc);
+
+        label = new JLabel("IP Address:");
+        label.setToolTipText(
+            "The server IP address. Hit Enter to save it for next start.");
+        gbc = (GridBagConstraints)gbcDefault.clone();
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        ipPanel.add(label, gbc);
+
+        ipText = new JTextField(40);
+        ipText.setToolTipText(label.getToolTipText());
+        ipText.setText(serverIp);
+        ipText.addActionListener(new ActionListener() {
             /**
-             * Responds to pressing the enter key in the textfield by sending
+             * Responds to pressing the enter key in the TextField.
+             */
+            public void actionPerformed(ActionEvent e) {
+                String text = ipText.getText();
+                // TODO check if valid
+                serverIpNext = text;
+            }
+        });
+        gbc = (GridBagConstraints)gbcDefault.clone();
+        gbc.gridx = 1;
+        gbc.gridy = 0;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 100;
+        ipPanel.add(ipText, gbc);
+
+        // Create the port panel
+        JPanel portPanel = new JPanel();
+        portPanel.setLayout(new GridBagLayout());
+        gbc = (GridBagConstraints)gbcDefault.clone();
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 100;
+        entries.add(portPanel, gbc);
+
+        label = new JLabel("Server Port:");
+        label.setToolTipText(
+            "The server port. Hit Enter to save it for next start.");
+        gbc = (GridBagConstraints)gbcDefault.clone();
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        portPanel.add(label, gbc);
+
+        portText = new JTextField(40);
+        portText.setToolTipText(label.getToolTipText());
+        portText.setText(Integer.toString(serverPort));
+        portText.addActionListener(new ActionListener() {
+            /**
+             * Responds to pressing the enter key in the TextField.
+             */
+            public void actionPerformed(ActionEvent e) {
+                int intVal;
+                try {
+                    intVal = Integer.parseInt(portText.getText());
+                } catch(NumberFormatException ex) {
+                    Utils.excMsg("Invalid port", ex);
+                    return;
+                }
+                serverPortNext = intVal;
+            }
+        });
+        gbc = (GridBagConstraints)gbcDefault.clone();
+        gbc.gridx = 1;
+        gbc.gridy = 0;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 100;
+        portPanel.add(portText, gbc);
+
+        // Create the data panel
+        JPanel dataPanel = new JPanel();
+        dataPanel.setLayout(new GridBagLayout());
+        gbc = (GridBagConstraints)gbcDefault.clone();
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 100;
+        entries.add(dataPanel, gbc);
+
+        label = new JLabel("Send:");
+        label.setToolTipText(
+            "Data to send to server or ? for help. Hit Enter to send it.");
+        gbc = (GridBagConstraints)gbcDefault.clone();
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        dataPanel.add(label, gbc);
+
+        dataText = new JTextField(40);
+        dataText.setText(INITIAL_DATA);
+        dataText.setToolTipText(label.getToolTipText());
+        dataText.addActionListener(new ActionListener() {
+            /**
+             * Responds to pressing the enter key in the TextField by sending
              * the contents of the text field to the server and displaying the
              * response from the server in the text area.
              */
             public void actionPerformed(ActionEvent e) {
-                String response;
                 if(socket == null) {
                     showMsg("Socket is null");
                     return;
@@ -101,21 +237,32 @@ public class SocketClient extends JFrame
                     return;
                 }
                 try {
-                    out.println(dataField.getText());
+                    out.println(dataText.getText());
                 } catch(Exception ex) {
                     showMsg("IO error writing to socket", ex);
                 }
-                dataField.selectAll();
+                dataText.selectAll();
             }
         });
-        this.add(dataField, BorderLayout.NORTH);
+        gbc = (GridBagConstraints)gbcDefault.clone();
+        gbc.gridx = 1;
+        gbc.gridy = 0;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 100;
+        dataPanel.add(dataText, gbc);
 
-        // Create the text area used for output. Request
-        // enough space for 5 rows and 30 columns.
+        // Create the text area used for output.
         textArea = new JTextArea(25, 30);
+        textArea.setToolTipText("Output window.  Latest at the top.");
         textArea.setEditable(false);
         JScrollPane scrollPane = new JScrollPane(textArea);
-        this.add(scrollPane, BorderLayout.CENTER);
+        gbc = (GridBagConstraints)gbcDefault.clone();
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.weightx = 100;
+        gbc.weighty = 100;
+        this.add(scrollPane, gbc);
     }
 
     /**
@@ -182,6 +329,15 @@ public class SocketClient extends JFrame
         menu.add(menuItem);
     }
 
+    /**
+     * Returns the user preference store.
+     * 
+     * @return
+     */
+    public static Preferences getUserPreferences() {
+        return Preferences.userRoot().node(P_PREFERENCE_NODE);
+    }
+
     public void run() {
         try {
             // Create and set up the window.
@@ -233,6 +389,8 @@ public class SocketClient extends JFrame
      */
     private void start() {
         stop();
+        serverIp = serverIpNext;
+        serverPort = serverPortNext;
         new Thread(new ClientThread()).start();
         showMsg("Started");
     }
@@ -258,6 +416,11 @@ public class SocketClient extends JFrame
      * Quits the application
      */
     private void quit() {
+        // Save the current values
+        Preferences prefs = getUserPreferences();
+        prefs.put(P_DEFAULT_IP, serverIp);
+        prefs.putInt(P_DEFAULT_PORT, serverPort);
+
         if(socket != null) {
             try {
                 socket.close();
@@ -295,7 +458,7 @@ public class SocketClient extends JFrame
         public void run() {
             try {
                 InetAddress serverAddr = InetAddress.getByName(SERVER_IP);
-                socket = new Socket(serverAddr, SERVERPORT);
+                socket = new Socket(serverAddr, SERVER_PORT);
                 in = new BufferedReader(
                     new InputStreamReader(socket.getInputStream()));
                 out = new PrintWriter(socket.getOutputStream(), true);
