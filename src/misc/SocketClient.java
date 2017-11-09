@@ -326,6 +326,19 @@ public class SocketClient extends JFrame
         menu.add(separator);
 
         menuItem = new JMenuItem();
+        menuItem.setText("Clear output");
+        menuItem.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent ae) {
+                if(textArea == null) return;
+                textArea.setText("");
+            }
+        });
+        menu.add(menuItem);
+
+        separator = new JSeparator();
+        menu.add(separator);
+
+        menuItem = new JMenuItem();
         menuItem.setText("About");
         menuItem.addActionListener(new ActionListener() {
 
