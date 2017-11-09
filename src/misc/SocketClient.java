@@ -17,6 +17,8 @@ import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.prefs.Preferences;
 
 import javax.swing.JFrame;
@@ -52,7 +54,7 @@ public class SocketClient extends JFrame
     private static final String TITLE = NAME;
 
     private static final String TIME_FORMAT = "HH:mm:ss.SSS";
-    private static final SimpleDateFormat mFormatter = new SimpleDateFormat(
+    private static final SimpleDateFormat dateFormat = new SimpleDateFormat(
         TIME_FORMAT, Locale.US);
     private static final String INITIAL_DATA = "Msg from " + NAME;
 
@@ -65,6 +67,11 @@ public class SocketClient extends JFrame
     private BufferedReader in;
     private PrintWriter out;
     private boolean socketRunning = false;
+
+    private static final boolean USE_TIMER = true;
+    private static final int TIMER_DELAY = 0;
+    private static final int TIMER_PERIOD = 5000;
+    private Timer timer;
 
     private Socket socket;
     private static final int SERVER_PORT = 6000;
@@ -81,10 +88,13 @@ public class SocketClient extends JFrame
     private static final String D_DEFAULT_IP = SERVER_IP;
 
     public SocketClient() {
+        // Restore saved values
         Preferences prefs = getUserPreferences();
         serverPort = serverPortNext = prefs.getInt(P_DEFAULT_PORT,
             D_DEFAULT_PORT);
         serverIp = serverIpNext = prefs.get(P_DEFAULT_IP, D_DEFAULT_IP);
+
+        // The user interface
         uiInit();
     }
 
@@ -372,16 +382,20 @@ public class SocketClient extends JFrame
     }
 
     private void showMsg(String text) {
-        Date currentTime = new Date();
-        String timeString = mFormatter.format(currentTime);
+        String timeString = timeStamp();
         if(textArea != null) {
             textArea.insert(timeString + " " + text + "\n", 0);
         }
     }
 
     private void showMsg(String text, Throwable t) {
-        String msg = text + " " + t.getMessage();
+        String msg = text + ": " + t.getMessage();
         showMsg(msg);
+    }
+
+    private String timeStamp() {
+        Date currentTime = new Date();
+        return dateFormat.format(currentTime);
     }
 
     /**
@@ -399,6 +413,9 @@ public class SocketClient extends JFrame
      * Closes the socket.
      */
     private void stop() {
+        if(timer != null) {
+            timer.cancel();
+        }
         socketRunning = false;
         if(socket != null) {
             try {
@@ -421,13 +438,7 @@ public class SocketClient extends JFrame
         prefs.put(P_DEFAULT_IP, serverIp);
         prefs.putInt(P_DEFAULT_PORT, serverPort);
 
-        if(socket != null) {
-            try {
-                socket.close();
-            } catch(Exception ex) {
-                // Do nothing
-            }
-        }
+        stop();
         System.exit(0);
     }
 
@@ -465,6 +476,22 @@ public class SocketClient extends JFrame
                 socketRunning = true;
                 showMsg("Socket: " + socket.getInetAddress().getHostAddress()
                     + ":" + socket.getPort());
+
+                if(USE_TIMER) {
+                    timer = new Timer();
+                    timer.scheduleAtFixedRate(new TimerTask() {
+                        @Override
+                        public void run() {
+                            if(socket == null || out == null) return;
+                            boolean connected = socket.isConnected();
+                            boolean closed = socket.isClosed();
+                            String info = timeStamp() + " ";
+                            info += (connected ? "conn" : "unconn") + ",";
+                            info += (closed ? "closed" : "open");
+                            out.println(info);
+                        }
+                    }, TIMER_DELAY, TIMER_PERIOD);
+                }
             } catch(UnknownHostException ex) {
                 String msg = "Unknown host error starting socket";
                 Utils.excMsg(msg, ex);
