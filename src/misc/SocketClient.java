@@ -20,6 +20,8 @@ import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.prefs.Preferences;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -56,6 +58,7 @@ public class SocketClient extends JFrame
     private static final String TIME_FORMAT = "HH:mm:ss.SSS";
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat(
         TIME_FORMAT, Locale.US);
+    private static final String IP_ADDRESS_PATTERN = "\\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}?(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\b";
     private static final String INITIAL_DATA = "Msg from " + NAME;
 
     private JMenuBar menuBar;
@@ -148,8 +151,16 @@ public class SocketClient extends JFrame
              */
             public void actionPerformed(ActionEvent e) {
                 String text = ipText.getText();
-                // TODO check if valid
-                serverIpNext = text;
+                // Check if a valid address
+                Pattern p = Pattern.compile(IP_ADDRESS_PATTERN);
+                Matcher m = p.matcher(text);
+                if(m.matches()) {
+                    serverIpNext = text;
+                    Utils.infoMsg("IP address saved: " + text);
+                    ipText.setCaretPosition(0);
+                } else {
+                    Utils.errMsg("Invalid IP address");
+                }
             }
         });
         gbc = (GridBagConstraints)gbcDefault.clone();
@@ -187,7 +198,10 @@ public class SocketClient extends JFrame
             public void actionPerformed(ActionEvent e) {
                 int intVal;
                 try {
-                    intVal = Integer.parseInt(portText.getText());
+                    String text = portText.getText();
+                    intVal = Integer.parseInt(text);
+                    Utils.infoMsg("Port saved: " + text);
+                    portText.setCaretPosition(0);
                 } catch(NumberFormatException ex) {
                     Utils.excMsg("Invalid port", ex);
                     return;
@@ -376,7 +390,6 @@ public class SocketClient extends JFrame
             this.setVisible(true);
         } catch(Throwable t) {
             String msg = "Error running " + NAME;
-            Utils.excMsg(msg, t);
             showMsg("Error closing socket", t);
         }
     }
@@ -494,11 +507,9 @@ public class SocketClient extends JFrame
                 }
             } catch(UnknownHostException ex) {
                 String msg = "Unknown host error starting socket";
-                Utils.excMsg(msg, ex);
                 showMsg("Error closing socket", ex);
             } catch(IOException ex) {
                 String msg = "IO error starting socket";
-                Utils.excMsg(msg, ex);
                 showMsg("Error closing socket", ex);
             }
             String inputLine;
