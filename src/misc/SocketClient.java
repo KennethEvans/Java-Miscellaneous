@@ -13,6 +13,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.net.URL;
 import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -23,6 +24,7 @@ import java.util.prefs.Preferences;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
@@ -390,9 +392,13 @@ public class SocketClient extends JFrame
                     quit();
                 }
             });
-            // // Set the icon
-            // ImageUtils.setIconImageFromResource(this,
-            // "/resources/ICC Profile Viewer.256x256.png");
+            
+            // Set the icon
+           URL url = SocketClient.class
+                .getResource("/resources/SocketClient.32x32.png");
+            if(url != null) {
+                this.setIconImage(new ImageIcon(url).getImage());
+            }
 
             // Has to be done here. The menus are not part of the JPanel.
             initMenus();
