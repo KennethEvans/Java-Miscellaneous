@@ -12,6 +12,7 @@
                 <attribute name="Main-Class" value="misc.TestFrameIconSize"/>
                 <attribute name="Class-Path" value="."/>
             </manifest>
+            <fileset dir="${dir.buildfile}/bin"/>
         </jar>
         <delete dir="${dir.jarfile}/TestFrameIconSize_lib"/>
         <mkdir dir="${dir.jarfile}/TestFrameIconSize_lib"/>
