@@ -74,8 +74,8 @@ public class SocketClient extends JFrame
     private boolean socketRunning = false;
 
     private static final boolean USE_TIMER = true;
-    private static final int TIMER_DELAY = 0;
-    private static final int TIMER_PERIOD = 5000;
+    private static final int TIMER_DELAY = 0; // ms
+    private static final int TIMER_PERIOD = 60000; // ms
     private Timer timer;
 
     private Socket socket;
@@ -85,6 +85,8 @@ public class SocketClient extends JFrame
     private static final String SERVER_IP = "192.168.0.100";
     private String serverIp = SERVER_IP;
     private String serverIpNext = SERVER_IP;
+    /** SO_TIMOUT for getting reads form server (Use 0 to not use timeout) */
+    private static int SOCKET_TIMEOUT = 120000; // ms
 
     private static final String P_PREFERENCE_NODE = "net/kenevans/socketClient/preferences";
     private static final String P_DEFAULT_PORT = "ServerPort";
@@ -392,9 +394,9 @@ public class SocketClient extends JFrame
                     quit();
                 }
             });
-            
+
             // Set the icon
-           URL url = SocketClient.class
+            URL url = SocketClient.class
                 .getResource("/resources/SocketClient.32x32.png");
             if(url != null) {
                 this.setIconImage(new ImageIcon(url).getImage());
@@ -502,6 +504,9 @@ public class SocketClient extends JFrame
             try {
                 InetAddress serverAddr = InetAddress.getByName(SERVER_IP);
                 socket = new Socket(serverAddr, SERVER_PORT);
+                if(SOCKET_TIMEOUT > 0) {
+                    socket.setSoTimeout(SOCKET_TIMEOUT);
+                }
                 in = new BufferedReader(
                     new InputStreamReader(socket.getInputStream()));
                 out = new PrintWriter(socket.getOutputStream(), true);
