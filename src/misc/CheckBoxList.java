@@ -85,7 +85,7 @@ public class CheckBoxList extends JList<Object>
             if(obj instanceof JCheckBox) {
                 JCheckBox checkbox = (JCheckBox)obj;
                 if(checkbox.isSelected()) {
-                    list.add(new Integer(i));
+                    list.add(Integer.valueOf(i));
                 }
             }
         }

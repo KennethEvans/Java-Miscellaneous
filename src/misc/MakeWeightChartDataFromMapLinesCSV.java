@@ -25,8 +25,8 @@ public class MakeWeightChartDataFromMapLinesCSV
 {
     // Note that the year must be specified
     private static int YEAR = 2018;
-    private static final String CSV_FILE_IN = "C:/Scratch/Weight Charts/WeightChart-2018-05-29.MapLines.csv";
-    private static final String CSV_FILE_OUT = "C:/Scratch/Weight Charts/WeightChart-2018-05-29.Data.csv";
+    private static final String CSV_FILE_IN = "C:/Scratch/Weight Charts/WeightChart-2018-07-16.MapLines.csv";
+    private static final String CSV_FILE_OUT = "C:/Scratch/Weight Charts/WeightChart-2018-07-16.Data.csv";
     // These are generic and don't require changing the Java file
     // But are confusing owing to the copying of files
     // private static final String CSV_FILE_IN = "C:/Scratch/Weight

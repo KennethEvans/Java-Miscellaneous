@@ -411,7 +411,7 @@ public class SocketClient extends JFrame
             this.setVisible(true);
         } catch(Throwable t) {
             String msg = "Error running " + NAME;
-            showMsg("Error closing socket", t);
+            showMsg(msg, t);
         }
     }
 
@@ -531,10 +531,10 @@ public class SocketClient extends JFrame
                 }
             } catch(UnknownHostException ex) {
                 String msg = "Unknown host error starting socket";
-                showMsg("Error closing socket", ex);
+                showMsg(msg, ex);
             } catch(IOException ex) {
                 String msg = "IO error starting socket";
-                showMsg("Error closing socket", ex);
+                showMsg(msg, ex);
             }
             String inputLine;
             while(socketRunning) {

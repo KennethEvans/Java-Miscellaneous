@@ -84,7 +84,7 @@ public class Synthesizer extends JPanel
     // Create the keyMap
     keyMap = new Hashtable<String, Integer>();
     for(int i = 0; i < keys.length; i++) {
-      keyMap.put(keys[i], new Integer(FIRST_PITCH + i));
+      keyMap.put(keys[i], Integer.valueOf(FIRST_PITCH + i));
     }
     
     // Create the mouse listener
