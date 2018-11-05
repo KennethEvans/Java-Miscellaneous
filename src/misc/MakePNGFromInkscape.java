@@ -36,13 +36,14 @@ public class MakePNGFromInkscape
     public static final int[] SIZES_ANDROID = {48, 72, 96, 144, 192};
     public static final int[] SIZES_JAVA = {32};
 
-    private static final String SVG_NAME = "Image Viewer.svg";
-    private static final String DEST_BASE_NAME = "Image Viewer";
+    private static final String SVG_NAME = "KritaBrushInfo2.svg";
+    private static final String DEST_BASE_NAME = "KritaBrushInfo2";
     private static final int[] SIZES = SIZES_WINDOWS_LARGE;
 
     private static final String SVG_PATH = "C:/Users/evans/Documents/Inkscape";
     private static final String DEST_PATH = "C:/Scratch/Icons/Test";
     private static final String EXE_PATH = "C:/Program Files/Inkscape/inkscape.exe";
+    private static final String LS_PATH = "C:\\Cygwin\\bin\\ls.exe";
 
     private static final String LS = Utils.LS;
     private static SimpleDateFormat dateFormat = new SimpleDateFormat(
@@ -149,7 +150,7 @@ public class MakePNGFromInkscape
                 file.getName());
         }
 
-        String[] cmds = new String[] {"ls"};
+        String[] cmds = new String[] {LS_PATH};
         try {
             run(cmds, new File(DEST_PATH));
         } catch(Exception ex) {
