@@ -33,9 +33,13 @@ import org.xml.sax.SAXException;
 
 public class XmlPrettyPrint
 {
-//    private static final String TEST_FILE = "C:/Users/evans/Documents/GPSLink/Polar/Kenneth_Evans_2018-08-10_09-02-44.tcx";
-//    private static final String TEST_FILE = "C:/Users/evans/Documents/GPSLink/Polar/Kenneth_Evans_2018-08-10_09-02-44.gpx";
-    private static final String TEST_FILE = "C:/Users/evans/Documents/GPSLink/STL/track2018-10-24-Walking-Kensington-2513579.gpx";
+    // private static final String TEST_FILE =
+    // "C:/Users/evans/Documents/GPSLink/Polar/Kenneth_Evans_2018-08-10_09-02-44.tcx";
+    // private static final String TEST_FILE =
+    // "C:/Users/evans/Documents/GPSLink/Polar/Kenneth_Evans_2018-08-10_09-02-44.gpx";
+    // private static final String TEST_FILE =
+    // "C:/Users/evans/Documents/GPSLink/STL/track2018-10-24-Walking-Kensington-2513579.gpx";
+    private static final String TEST_FILE = "C:/Users/evans/Documents/GPSLink/FitnessHistoryDetail.tcx";
     private static final int INDENT = 2;
 
     public static String toPrettyString(String xml, int indent) {
@@ -77,7 +81,7 @@ public class XmlPrettyPrint
         }
     }
 
-    private static String convertDocumentToString(Document doc) {
+    public static String convertDocumentToString(Document doc) {
         TransformerFactory tf = TransformerFactory.newInstance();
         Transformer transformer;
         try {
@@ -96,7 +100,7 @@ public class XmlPrettyPrint
         return null;
     }
 
-    private static Document convertStringToDocument(String xmlStr) {
+    public static Document convertStringToDocument(String xmlStr) {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder;
         try {
@@ -111,19 +115,21 @@ public class XmlPrettyPrint
     }
 
     public static void main(String[] args) {
+        String fileName;
+        if(args.length > 0) {
+            fileName = args[0];
+        } else {
+            fileName = TEST_FILE;
+        }
+        System.out.println(fileName);
+        System.out.println();
         String xml;
-        // String xml = "<root>" + //
-        // "\n " + //
-        // "\n<name>Coco Puff</name>" + //
-        // "\n <total>10</total> </root>";
-        // System.out.println(toPrettyString(xml, INDENT));
-
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         dbf.setValidating(false);
         DocumentBuilder db;
         try {
             db = dbf.newDocumentBuilder();
-            Document doc = db.parse(new FileInputStream(new File(TEST_FILE)));
+            Document doc = db.parse(new FileInputStream(new File(fileName)));
             xml = convertDocumentToString(doc);
             System.out.println(toPrettyString(xml, INDENT));
         } catch(IOException ex) {
