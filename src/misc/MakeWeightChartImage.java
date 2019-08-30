@@ -20,8 +20,11 @@ import java.util.Date;
 import java.util.List;
 
 import javax.imageio.ImageIO;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.UIManager;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 /*
  * Created on Aug 27, 2019
@@ -36,8 +39,9 @@ public class MakeWeightChartImage
     private static List<Data> weights = new ArrayList<Data>();
     private static BufferedImage bi;
     private static int processingQuarter = 0;
-    private static final SimpleDateFormat defaultFormatter = new SimpleDateFormat(
-        "MM/dd/yyyy");
+    private static final String SAVE_TEMPLATE = "Weight Chart %d (through %s).png";
+    private static final SimpleDateFormat lastDateFormatter = new SimpleDateFormat(
+        "yyyy-MM-dd");
 
     private static int YEAR = 2019;
     private static int[] XVALS = {0, 5, 10, 15, 20, 25, 30, 5, 10, 15, 20, 25,
@@ -96,15 +100,18 @@ public class MakeWeightChartImage
     private static Font FONT_LABELS = new Font(Font.SANS_SERIF, Font.PLAIN, 54);
     private static Font FONT_MONTHS = new Font(Font.SANS_SERIF, Font.BOLD, 36);
 
-    private static final Rectangle TITLE_RECT = new Rectangle();
+    private static String currentDir = INPUT_DIR;
+    private static String lastDate = "error";
+    private static File outputFile;
+    public static final String LS = System.getProperty("line.separator");
 
-    private static void parseFile(String fileName) {
+    private static void parseFile(File file) {
         BufferedReader in = null;
         String inputLine;
         String[] tokens;
         boolean first = true;
         try {
-            in = new BufferedReader(new FileReader(fileName));
+            in = new BufferedReader(new FileReader(file));
             while((inputLine = in.readLine()) != null) {
                 if(first) {
                     first = false;
@@ -298,8 +305,8 @@ public class MakeWeightChartImage
             g2d.drawLine(x0, y0, x, y);
             x0 = x;
             y0 = y;
+            lastDate = lastDateFormatter.format(date);
         }
-
     }
 
     private static int getXVal(int day, int month) {
@@ -323,13 +330,85 @@ public class MakeWeightChartImage
         return yval;
     }
 
-    private static void saveImage(BufferedImage bi, File file)
-        throws IOException {
+    /**
+     * Prompts for a SWT CSV file with dates and weights.
+     * 
+     * @return If successful or not.
+     */
+    private static boolean openFile() {
+        // Prompt for file
+        JFileChooser chooser = new JFileChooser();
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("CSV",
+            "csv");
+        chooser.setFileFilter(filter);
+        chooser.setDialogTitle("Open SWT CSV File");
+        if(currentDir != null) {
+            File file = new File(currentDir);
+            if(file != null && file.exists()) {
+                chooser.setCurrentDirectory(file);
+            }
+        }
+        int result = chooser.showOpenDialog(null);
+        if(result == JFileChooser.APPROVE_OPTION) {
+            File file = chooser.getSelectedFile();
+            // Save the selected path for next time
+            currentDir = chooser.getSelectedFile().getPath();
+            parseFile(file);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Prompts for saving a file.
+     * 
+     * @return If successful or not.
+     * @throws IOException
+     */
+    private static boolean saveFile() throws IOException {
+        // Prompt for file
+        JFileChooser chooser = new JFileChooser();
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("PNG",
+            "png");
+        chooser.setFileFilter(filter);
+        chooser.setDialogTitle("Save Chart as Image");
+        if(outputFile != null) {
+            chooser.setCurrentDirectory(outputFile.getParentFile());
+            chooser.setSelectedFile(outputFile);
+        } else if(currentDir != null) {
+            File file = new File(currentDir);
+            if(file != null && file.exists()) {
+                chooser.setCurrentDirectory(file);
+            }
+        }
+        int result = chooser.showSaveDialog(null);
+        if(result == JFileChooser.APPROVE_OPTION) {
+            File file = chooser.getSelectedFile();
+            // Save the selected path for next time
+            currentDir = chooser.getSelectedFile().getParentFile().getPath();
+            if(file.exists()) {
+                int res = JOptionPane.showConfirmDialog(null,
+                    "File exists:" + LS + file.getPath() + LS
+                        + "OK to overwrite?",
+                    "File Exists", JOptionPane.OK_CANCEL_OPTION);
+                if(res != JOptionPane.OK_OPTION) {
+                    return false;
+                }
+            }
+            saveImage(file);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private static void saveImage(File file) throws IOException {
         ImageIO.write(bi, IMAGE_TYPE, file);
         System.out.println("Wrote " + file.getPath());
     }
 
-    private static void parameterPrint(String name, int param) {
+    public static void parameterPrint(String name, int param) {
         System.out.println(name + "=" + param + " ("
             + String.format("%.3f", param / DPI) + ")");
     }
@@ -416,15 +495,25 @@ public class MakeWeightChartImage
         // parameterPrint("GRAPH_Y", GRAPH_Y);
         // parameterPrint("BLOCK_WIDTH", BLOCK_WIDTH);
 
-        parseFile(inFileName);
+        boolean res = openFile();
+        if(!res) {
+            System.out.println();
+            System.out.println("Aborted");
+            return;
+        }
         createImage();
-        File outputFile = new File(DEST_DIR + "/"
-            + inputFile.getName().replaceFirst("[.][^.]+$", "") + ".png");
         drawCurves();
         try {
-            saveImage(bi, outputFile);
+            outputFile = new File(
+                DEST_DIR + "/" + String.format(SAVE_TEMPLATE, YEAR, lastDate));
+            res = saveFile();
+            if(!res) {
+                System.out.println();
+                System.out.println("Aborted");
+                return;
+            }
         } catch(Exception ex) {
-            System.out.println("Failed to save " + outputFile);
+            System.out.println("Failed to save output file");
             ex.printStackTrace();
             System.out.println();
             System.out.println("Aborted");
