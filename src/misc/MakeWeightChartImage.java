@@ -34,7 +34,6 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 public class MakeWeightChartImage
 {
     private static final String INPUT_DIR = "C:/Scratch/Weight Charts/Simple Weight Tracker";
-    private static final String INPUT_FILE_NAME_PREFIX = "SWT_EXPORT_08_28_19_16_47";
     private static final String DEST_DIR = "C:/Scratch/Weight Charts/Simple Weight Tracker/Charts";
     private static List<Data> weights = new ArrayList<Data>();
     private static BufferedImage bi;
@@ -482,9 +481,10 @@ public class MakeWeightChartImage
             t.printStackTrace();
         }
 
-        String inFileName = INPUT_DIR + "/" + INPUT_FILE_NAME_PREFIX + ".csv";
-        File inputFile = new File(inFileName);
-        System.out.println("Processing " + inputFile.getPath());
+        // String inFileName = INPUT_DIR + "/" + INPUT_FILE_NAME_PREFIX +
+        // ".csv";
+        // File inputFile = new File(inFileName);
+        // System.out.println("Processing " + inputFile.getPath());
 
         // // DEBUG
         // parameterPrint("WIDTH", WIDTH);
