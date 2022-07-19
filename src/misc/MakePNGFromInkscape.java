@@ -36,13 +36,19 @@ public class MakePNGFromInkscape
     public static final int[] SIZES_ANDROID = {48, 72, 96, 144, 192};
     public static final int[] SIZES_JAVA = {32};
 
-    private static final String SVG_NAME = "FontViewer.svg";
-    private static final String DEST_BASE_NAME = "FontViewer";
+    private static final String SVG_NAME = "Image View.svg";
+    private static final String DEST_BASE_NAME = "Image View";
     private static final int[] SIZES = SIZES_WINDOWS_LARGE;
 
     private static final String SVG_PATH = "C:/Users/evans/Documents/Inkscape";
     private static final String DEST_PATH = "C:/Scratch/Icons/Test";
-    private static final String EXE_PATH = "C:/Program Files/Inkscape/inkscape.exe";
+
+    // // Inkscape .92
+    // private static final String EXE_PATH = "C:/Program
+    // Files/Inkscape/inkscape.exe";
+
+    // Inkscape 1.2
+    private static final String EXE_PATH = "C:/Program Files/Inkscape/bin/inkscape.exe";
     private static final String LS_PATH = "C:\\Cygwin\\bin\\ls.exe";
 
     private static final String LS = Utils.LS;
@@ -95,15 +101,26 @@ public class MakePNGFromInkscape
         File svgFile;
         svgFile = new File(SVG_PATH, SVG_NAME);
         argsList.add(EXE_PATH);
-        argsList.add("--without-gui");
-        argsList.add("--file=" + svgFile.getPath());
-        argsList.add("--export-png=" + DEST_BASE_NAME + "." + size + "x" + size
-            + ".png");
+
+        // // Inkscape .92
+        // argsList.add("--without-gui");
+        // argsList.add("--file=" + svgFile.getPath());
+        // argsList.add("--export-png=" + DEST_BASE_NAME + "." + size + "x" +
+        // size
+        // + ".png");
+        // argsList.add("--export-width=" + size);
+        // argsList.add("--export-height=" + size);
+        // // These just make it quit without doing anything
+        // // argsList.add("--verb=FileClose");
+        // // argsList.add("--verb=FileQuit");
+
+        // Inkscape 1.2
+        argsList.add(svgFile.getPath());
+        argsList.add("--export-type=\"png\"");
+        argsList.add("--export-filename=" + DEST_BASE_NAME + "." + size + "x"
+            + size + ".png");
         argsList.add("--export-width=" + size);
         argsList.add("--export-height=" + size);
-        // These just make it quit without doing anything
-        // argsList.add("--verb=FileClose");
-        // argsList.add("--verb=FileQuit");
 
         String[] cmds = argsList.toArray(new String[argsList.size()]);
 
@@ -114,7 +131,10 @@ public class MakePNGFromInkscape
         System.out.println();
 
         try {
-            run(cmds, new File(DEST_PATH));
+            String out = run(cmds, new File(DEST_PATH));
+            if(out != null && out.length() > 0) {
+                System.out.println("Returned: " + out);
+            }
         } catch(Exception ex) {
             ex.printStackTrace();
         }
